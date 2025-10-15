@@ -5,19 +5,19 @@
 <p>The script allows you to launch a live image preview from the GOYOJO GW192A camera.
 I used Python.
 <br>For the script to work properly, you need to install openCV and numpy.
+</p>
+<p>
+<b>[2025/10/15, 23:30] I changed the app controls:</b>
+<br>Application features:
 <br>
-<br>Since I change the image size in the script, you can set its variable scale:
-<br><code>scale_percent</code>
-<br>
-<br>Changing the scale simultaneously adjusts the video preview window.
-<br>
-The interpolation algorithm is set here:
-<br><code>interpolation = cv2.INTER_[......]</code>
-<br>
-<br>You can change the color map in the line:
-<br><code>cv2.applyColorMap(frame, cv2.COLORMAP_[.......])</code>
-<br>
-<br>To exit the script, press the ‘q’ key on your keyboard.
+<br>Type [H] to show/hide help
+<br>Type [+]/[-] to resize window
+<br>Type [R] to rotate window
+<br>Type [P] to change the color palette.
+<br>Type [Q] to close application
+
+![alt text](https://raw.githubusercontent.com/kuczy/GOYOJO-GW192A-Thermal-Camera/refs/heads/main/images/new_features.JPG "new_features.JPG")
+  
 </p>
 <hr>
 <p>
