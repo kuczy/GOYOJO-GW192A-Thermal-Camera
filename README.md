@@ -1,5 +1,24 @@
 # GOYOJO-GW192A-Thermal-Camera
 
+![alt text](https://raw.githubusercontent.com/kuczy/GOYOJO-GW192A-Thermal-Camera/refs/heads/main/images/script.jpg "Script")
+
+<p>The script allows you to launch a live image preview from the GOYOJO GW192A camera.
+I used Python.
+<br>For the script to work properly, you need to install openCV and numpy.
+<br>
+<br>Since I change the image size in the script, you can set its variable scale:
+<br><code>scale_percent</code>
+<br>
+<br>Changing the scale simultaneously adjusts the video preview window.
+<br>
+The interpolation algorithm is set here:
+<br><code>interpolation = cv2.INTER_[......]</code>
+<br>
+<br>You can change the color map in the line:
+<br><code>cv2.applyColorMap(frame, cv2.COLORMAP_[.......])</code>
+<br>
+<br>To exit the script, press the ‘q’ key on your keyboard.
+</p>
 <p>
 <b>NOTE:</b>
 <br>The GOYOJO thermal imaging camera is advertised and sold as a camera with a resolution of 192x192 pixels, while in fact the resolution of the optical sensor is only 96x96 pixels:
