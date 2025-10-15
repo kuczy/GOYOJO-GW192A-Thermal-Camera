@@ -19,6 +19,7 @@ The interpolation algorithm is set here:
 <br>
 <br>To exit the script, press the ‘q’ key on your keyboard.
 </p>
+<hr>
 <p>
 <b>NOTE:</b>
 <br>The GOYOJO thermal imaging camera is advertised and sold as a camera with a resolution of 192x192 pixels, while in fact the resolution of the optical sensor is only 96x96 pixels:
