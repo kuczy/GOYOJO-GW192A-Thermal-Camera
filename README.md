@@ -11,7 +11,7 @@ I used Python.
 <br>1. I added the option to take a screenshot as *.png - save to the ‘snapshots’ folder,
 <br>2. I added an automatic option to save user settings for rotation, scale, and heat maps - ‘settings’ folder - ‘config.json’ file
 </b>
-<b>[2025/10/15, 23:30] I changed the app controls:</b>
+<br><b>[2025/10/15, 23:30] I changed the app controls:</b>
 <br>Application features:
 <br>
 <br>Type [H] to show/hide help
