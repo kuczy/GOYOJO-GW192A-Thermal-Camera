@@ -91,7 +91,7 @@ video_writer = None
 video_filename = None
 rec_blink_state = False
 last_blink_time = 0
-BLINK_INTERVAL = 0.5  # seconds
+BLINK_INTERVAL = 1  # seconds
 
 # --- Load persisted settings ---
 settings = load_settings()
