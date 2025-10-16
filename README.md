@@ -7,18 +7,13 @@ I used Python.
 <br>For the script to work properly, you need to install openCV and numpy.
 </p>
 <p>
-<b>[2025/10/16, 11:10]
-<br>1. I added the option to take a screenshot as *.png - save to the ‘snapshots’ folder,
-<br>2. I added an automatic option to save user settings for rotation, scale, and heat maps - ‘settings’ folder - ‘config.json’ file
-</b>
-<br><br><b>[2025/10/15, 23:30] I changed the app controls:</b>
 <br>Application features:
 <br>
 <br>Type [H] to show/hide help
 <br>Type [+]/[-] to resize window
 <br>Type [R] to rotate window
-<br>Type [P] to change the color palette.
-<br>Type [S] to save the screenshot as a PNG file
+<br>Type [P] to change the color palette
+<br>Type [I] to change the interpolation type
 <br>Type [Q] to close application
 
 ![alt text](https://raw.githubusercontent.com/kuczy/GOYOJO-GW192A-Thermal-Camera/refs/heads/main/images/new_features.JPG "new_features.JPG")

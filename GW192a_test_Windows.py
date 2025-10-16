@@ -5,6 +5,7 @@ import os
 import json
 import tempfile
 import traceback
+import time
 
 # The name of the folder where the screenshots and settings will be saved
 SAVE_DIR = "snapshots"
@@ -45,6 +46,7 @@ def load_settings():
     default_settings = {
         "rotation_index": 1,  # 90°
         "map_index": 0,
+        "interpolation_index": 0,
         "scale_percent": 600
     }
 
@@ -83,6 +85,7 @@ def update_and_save(settings, key, value):
 settings = load_settings()
 rotation_index = int(settings.get("rotation_index", 1))
 map_index = int(settings.get("map_index", 0))
+interpolation_index = int(settings.get("interpolation_index", 0))
 scale_percent = int(settings.get("scale_percent", 600))
 min_scale = 150
 max_scale = 1000
@@ -124,7 +127,28 @@ color_maps = [
     cv2.COLORMAP_VIRIDIS,
     cv2.COLORMAP_WINTER
 ]
+# List of available interpolation
+interpolation_type = [
+    cv2.INTER_LINEAR_EXACT,   # default
+    cv2.INTER_NEAREST,
+    cv2.INTER_AREA,
+    cv2.INTER_BITS,
+    cv2.INTER_BITS2,
+    cv2.INTER_CUBIC,
+    cv2.INTER_LANCZOS4,
+    cv2.INTER_LINEAR
+]
 
+# --- komunikaty ekranowe ---
+last_message = ""
+last_message_time = 0
+MESSAGE_DURATION = 2.0  # sekundy
+
+def show_message(text):
+    """Ustawia tekst do wyświetlenia przez 2 sekundy."""
+    global last_message, last_message_time
+    last_message = text
+    last_message_time = time.time()
 #--------------------------------------------------------------------------------
 
 # Replace "0" with a file path to work with a saved video
@@ -160,7 +184,7 @@ while True:
     if len(color_maps) > 0:
         frame = cv2.applyColorMap(frame, color_maps[map_index])
         
-    frame = cv2.resize(frame, dim, interpolation = cv2.INTER_LINEAR_EXACT) #https://www.opencvhelp.org/tutorials/video-processing/how-to-resize-video/
+    frame = cv2.resize(frame, dim, interpolation = interpolation_type[interpolation_index]) #https://www.opencvhelp.org/tutorials/video-processing/how-to-resize-video/
     #frame = cv2.resize(frame, (200, 200)) # You could specyfy your own window size if needed
     
     # TEXTS
@@ -182,12 +206,19 @@ while True:
         org = (10, 70)
         cv2.putText(frame, 'Type [R] to rotate window', org, font, fontScale, color, thickness, cv2.LINE_AA)
         org = (10, 85)
-        cv2.putText(frame, 'Type [P] to change the color palette.', org, font, fontScale, color, thickness, cv2.LINE_AA)
+        cv2.putText(frame, 'Type [P] to change the color palette', org, font, fontScale, color, thickness, cv2.LINE_AA)
         org = (10, 100)
-        cv2.putText(frame, 'Type [S] to save the screenshot as a PNG file', org, font, fontScale, color, thickness, cv2.LINE_AA)
+        cv2.putText(frame, 'Type [I] to change the interpolation type', org, font, fontScale, color, thickness, cv2.LINE_AA)
         org = (10, 115)
+        cv2.putText(frame, 'Type [S] to save the screenshot as a PNG file', org, font, fontScale, color, thickness, cv2.LINE_AA)
+        org = (10, 130)
         cv2.putText(frame, 'Type [Q] to close application', org, font, fontScale, color, thickness, cv2.LINE_AA)
         pass
+    
+    # --- wyświetlanie komunikatu przez 2 sekundy ---
+    if last_message and (time.time() - last_message_time < MESSAGE_DURATION):
+        org = (10, (new_height - 25))
+        cv2.putText(frame, last_message, org, font, fontScale, color, thickness, cv2.LINE_AA)
     
     # Show video frame
     cv2.imshow("GW192A thermal Camera Live View", frame)
@@ -201,6 +232,7 @@ while True:
     elif key in (ord('r'), ord('R')):
         rotation_index = (rotation_index + 1) % 4
         update_and_save(settings, "rotation_index", rotation_index)
+        show_message(f"Rotate: {rotation_index * 90}*")
     elif key in (ord('p'), ord('P')):
         # security: what if the map list is empty?
         if len(color_maps) == 0:
@@ -208,12 +240,23 @@ while True:
         else:
             map_index = (map_index + 1) % len(color_maps)
             update_and_save(settings, "map_index", map_index)
+            show_message(f"Color palette: {map_index+1} of 22")
+    elif key in (ord('i'), ord('I')):
+        # security: what if the map list is empty?
+        if len(interpolation_type) == 0:
+            print("No interpolation type available in interpolation_type.")
+        else:
+            interpolation_index = (interpolation_index + 1) % len(interpolation_type)
+            update_and_save(settings, "interpolation_index", interpolation_index)
+            show_message(f"Interpolation type: {interpolation_index+1} of 8")
     elif key in (ord('+'), ord('=')):
         scale_percent = min(scale_percent + step, max_scale)
         update_and_save(settings, "scale_percent", scale_percent)
+        show_message(f"Scale: {scale_percent}%")
     elif key in (ord('-'), ord('_')):
         scale_percent = max(scale_percent - step, min_scale)
         update_and_save(settings, "scale_percent", scale_percent)
+        show_message(f"Scale: {scale_percent}%")
     elif key == ord('s') or key == ord('S'):
         # Current date and time
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")

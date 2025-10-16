@@ -1,5 +1,6 @@
 {
     "rotation_index": 1,
     "map_index": 0,
+    "interpolation_index": 0,
     "scale_percent": 600
 }
