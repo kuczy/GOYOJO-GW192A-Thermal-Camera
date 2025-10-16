@@ -173,7 +173,7 @@ try:
             colored = cv2.applyColorMap(gray_uint8, cmap)
         except Exception as e:
             traceback.print_exc()
-            print(f"⚠️ Invalid colormap at index {map_index}, falling back to COLORMAP_INFERNO")
+            print(f"Invalid colormap at index {map_index}, falling back to COLORMAP_INFERNO")
             map_index = 0
             colored = cv2.applyColorMap(gray_uint8, color_maps[0])
 
@@ -185,7 +185,7 @@ try:
             clean_frame = cv2.resize(colored, (new_w, new_h), interpolation=interp)
         except Exception as e:
             traceback.print_exc()
-            print(f"⚠️ Invalid interpolation index {interpolation_index}, fallback to INTER_LINEAR.")
+            print(f"Invalid interpolation index {interpolation_index}, fallback to INTER_LINEAR.")
             clean_frame = cv2.resize(colored, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
 
         # --- Display frame with overlays ---
