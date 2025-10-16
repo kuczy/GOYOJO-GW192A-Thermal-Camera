@@ -2,21 +2,97 @@ import cv2
 import numpy as np
 from datetime import datetime
 import os
+import json
+import tempfile
+import traceback
 
-# The name of the folder where the screenshots will be saved
+# The name of the folder where the screenshots and settings will be saved
 SAVE_DIR = "snapshots"
+SETTINGS_DIR = "settings"
+SETTINGS_FILE = os.path.join(SETTINGS_DIR, "config.json")
 # Create folder if it does not exist
 os.makedirs(SAVE_DIR, exist_ok=True)
-# Camera resolution
-cameraResolution_Horizontal = 96
-cameraResolution_Vertical = 96
-# Resize the frame
-scale_percent = 600  # początkowa wartość
+# Load settings
+def ensure_settings_dir():
+    os.makedirs(SETTINGS_DIR, exist_ok=True)
+
+def atomic_save_json(path, data):
+    """Writes JSON atomically: first to a temporary file, then replace."""
+    ensure_settings_dir()
+    dir_name = os.path.dirname(path) or "."
+    try:
+        fd, tmp_path = tempfile.mkstemp(prefix="tmp_settings_", dir=dir_name, text=True)
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4, ensure_ascii=False)
+            f.flush()
+            os.fsync(f.fileno())
+        # atomic override
+        os.replace(tmp_path, path)
+        return True
+    except Exception:
+        # If something went wrong, try deleting the temporary file
+        try:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+        except Exception:
+            pass
+        traceback.print_exc()
+        return False
+
+def load_settings():
+    """Loads settings from a JSON file or creates defaults and saves them."""
+    ensure_settings_dir()
+    default_settings = {
+        "rotation_index": 1,  # 90°
+        "map_index": 0,
+        "scale_percent": 600
+    }
+
+    if not os.path.exists(SETTINGS_FILE):
+        # we save the default settings and return them
+        atomic_save_json(SETTINGS_FILE, default_settings)
+        return default_settings
+
+    try:
+        with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        # make sure all keys exist (adjustment after program update)
+        changed = False
+        for k, v in default_settings.items():
+            if k not in data:
+                data[k] = v
+                changed = True
+        if changed:
+            atomic_save_json(SETTINGS_FILE, data)
+        return data
+    except Exception:
+        traceback.print_exc()
+        # if the file is corrupted - overwrite with default ones
+        atomic_save_json(SETTINGS_FILE, default_settings)
+        return default_settings
+
+def update_and_save(settings, key, value):
+    """Update settings[key] = value and immediately save to file."""
+    settings[key] = value
+    success = atomic_save_json(SETTINGS_FILE, settings)
+    if not success:
+        print("Warning: Failed to save settings to disk.")
+    return success
+
+# Load settings from file
+settings = load_settings()
+rotation_index = int(settings.get("rotation_index", 1))
+map_index = int(settings.get("map_index", 0))
+scale_percent = int(settings.get("scale_percent", 600))
 min_scale = 150
 max_scale = 1000
 step = 50
+# Help text visibility
+show_text = False  # hidden on start
+# Camera resolution
+cameraResolution_Horizontal = 96
+cameraResolution_Vertical = 96
 # Rotation frame
-rotation_index = 1  # 0=NoRotation, 1=90°, 2=180°, 3=270°
 rotation_modes = [
     None,  # 0 stopni
     cv2.ROTATE_90_CLOCKWISE,
@@ -47,11 +123,9 @@ color_maps = [
     cv2.COLORMAP_TWILIGHT_SHIFTED,
     cv2.COLORMAP_VIRIDIS,
     cv2.COLORMAP_WINTER
-    # mapa 2
 ]
-map_index = 0  # current heat map index
-# Help text visibility
-show_text = False  # hidden on start
+
+#--------------------------------------------------------------------------------
 
 # Replace "0" with a file path to work with a saved video
 stream = cv2.VideoCapture(1, cv2.CAP_DSHOW)
@@ -78,12 +152,18 @@ while True:
     if rotation_modes[rotation_index] is not None:
         frame = cv2.rotate(frame, rotation_modes[rotation_index])
   
+    # Normalize frame to 256 gray
     cv2.normalize(frame, frame, 0, 255, cv2.NORM_MINMAX)
     frame = np.uint8(frame)
-    # Use of the current color map
-    frame = cv2.applyColorMap(frame, color_maps[map_index])
+    
+    # Use of the current color map (make sure the map list is not empty)
+    if len(color_maps) > 0:
+        frame = cv2.applyColorMap(frame, color_maps[map_index])
+        
     frame = cv2.resize(frame, dim, interpolation = cv2.INTER_LINEAR_EXACT) #https://www.opencvhelp.org/tutorials/video-processing/how-to-resize-video/
     #frame = cv2.resize(frame, (200, 200)) # You could specyfy your own window size if needed
+    
+    # TEXTS
     org = (10, (new_height - 10))
     color = (255, 255, 255)
     font = cv2.FONT_HERSHEY_SIMPLEX
@@ -109,21 +189,31 @@ while True:
         cv2.putText(frame, 'Type [Q] to close application', org, font, fontScale, color, thickness, cv2.LINE_AA)
         pass
     
+    # Show video frame
     cv2.imshow("GW192A thermal Camera Live View", frame)
     
+    # Keyboard application control
     key = cv2.waitKey(1) & 0xFF
-    if key == ord('q') or key == ord('Q'):  # Exit aplication
+    if key == ord('q'):
         break
-    elif key == ord('+') or key == ord('='):
-        scale_percent = min(scale_percent + step, max_scale)
-    elif key == ord('-') or key == ord('_'):
-        scale_percent = max(scale_percent - step, min_scale)
     elif key == ord('h') or key == ord('H'):
         show_text = not show_text  # switching help information
-    elif key == ord('r') or key == ord('R'):
-        rotation_index = (rotation_index + 1) % 4  # rotate 90° right
-    elif key == ord('p') or key == ord('P'):
-        map_index = (map_index + 1) % len(color_maps) # switch heat colour maps
+    elif key in (ord('r'), ord('R')):
+        rotation_index = (rotation_index + 1) % 4
+        update_and_save(settings, "rotation_index", rotation_index)
+    elif key in (ord('p'), ord('P')):
+        # security: what if the map list is empty?
+        if len(color_maps) == 0:
+            print("No color maps available in color_maps.")
+        else:
+            map_index = (map_index + 1) % len(color_maps)
+            update_and_save(settings, "map_index", map_index)
+    elif key in (ord('+'), ord('=')):
+        scale_percent = min(scale_percent + step, max_scale)
+        update_and_save(settings, "scale_percent", scale_percent)
+    elif key in (ord('-'), ord('_')):
+        scale_percent = max(scale_percent - step, min_scale)
+        update_and_save(settings, "scale_percent", scale_percent)
     elif key == ord('s') or key == ord('S'):
         # Current date and time
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
