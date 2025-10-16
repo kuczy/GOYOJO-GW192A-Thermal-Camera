@@ -81,6 +81,25 @@ def update_and_save(settings, key, value):
         print("Warning: Failed to save settings to disk.")
     return success
 
+# --- text messages ---
+last_message = ""
+last_message_time = 0
+MESSAGE_DURATION = 2.0  # seconds
+
+def show_message(text):
+    """Show a short on-screen message for 2 seconds."""
+    global last_message, last_message_time
+    last_message = text
+    last_message_time = time.time()
+    
+# Video recording state
+is_recording = False
+video_writer = None
+video_filename = None
+rec_blink_state = False  # True/False switch for blinking effect
+last_blink_time = 0
+BLINK_INTERVAL = 1  # seconds for blinking "REC"
+    
 # Load settings from file
 settings = load_settings()
 rotation_index = int(settings.get("rotation_index", 1))
@@ -139,16 +158,6 @@ interpolation_type = [
     cv2.INTER_LINEAR
 ]
 
-# --- komunikaty ekranowe ---
-last_message = ""
-last_message_time = 0
-MESSAGE_DURATION = 2.0  # sekundy
-
-def show_message(text):
-    """Ustawia tekst do wyświetlenia przez 2 sekundy."""
-    global last_message, last_message_time
-    last_message = text
-    last_message_time = time.time()
 #--------------------------------------------------------------------------------
 
 # Replace "0" with a file path to work with a saved video
@@ -187,6 +196,19 @@ while True:
     frame = cv2.resize(frame, dim, interpolation = interpolation_type[interpolation_index]) #https://www.opencvhelp.org/tutorials/video-processing/how-to-resize-video/
     #frame = cv2.resize(frame, (200, 200)) # You could specyfy your own window size if needed
     
+    # --- If video recording is active, write the frame to file ---
+    if is_recording and video_writer is not None:
+        video_writer.write(frame)
+        # Toggle blinking "REC" every 0.5 sec
+        current_time = time.time()
+        if current_time - last_blink_time >= BLINK_INTERVAL:
+            rec_blink_state = not rec_blink_state
+            last_blink_time = current_time
+        # Show blinking "REC" text
+        if rec_blink_state:
+            cv2.putText(frame, "REC", (frame.shape[1] - 80, 40),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3, cv2.LINE_AA)
+    
     # TEXTS
     org = (10, (new_height - 10))
     color = (255, 255, 255)
@@ -212,6 +234,8 @@ while True:
         org = (10, 115)
         cv2.putText(frame, 'Type [S] to save the screenshot as a PNG file', org, font, fontScale, color, thickness, cv2.LINE_AA)
         org = (10, 130)
+        cv2.putText(frame, 'Type [V] to capture video as MP4 file', org, font, fontScale, color, thickness, cv2.LINE_AA)
+        org = (10, 145)
         cv2.putText(frame, 'Type [Q] to close application', org, font, fontScale, color, thickness, cv2.LINE_AA)
         pass
     
@@ -263,6 +287,31 @@ while True:
         filename = os.path.join(SAVE_DIR, f"snapshot_{timestamp}.png")
         # Capturing a frame and saving it to a file
         cv2.imwrite(filename, frame)
+    elif key in (ord('v'), ord('V')):
+            # Start/stop video recording
+            if not is_recording:
+                # --- Start recording ---
+                timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                video_filename = os.path.join(SAVE_DIR, f"capture_{timestamp}.mp4")
+
+                # Determine output parameters
+                fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+                fps = 25
+                frame_size = (frame.shape[1], frame.shape[0])
+
+                video_writer = cv2.VideoWriter(video_filename, fourcc, fps, frame_size)
+                is_recording = True
+                show_message(f"Recording started: {os.path.basename(video_filename)}")
+            else:
+                # --- Stop recording ---
+                is_recording = False
+                if video_writer is not None:
+                    video_writer.release()
+                    video_writer = None
+                    show_message(f"Recording stopped: {os.path.basename(video_filename)}")
+
 
 stream.release()
+if video_writer is not None:
+    video_writer.release()
 cv2.destroyAllWindows() #!
