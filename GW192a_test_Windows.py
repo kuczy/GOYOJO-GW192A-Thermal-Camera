@@ -1,6 +1,12 @@
 import cv2
 import numpy as np
+from datetime import datetime
+import os
 
+# The name of the folder where the screenshots will be saved
+SAVE_DIR = "snapshots"
+# Create folder if it does not exist
+os.makedirs(SAVE_DIR, exist_ok=True)
 # Camera resolution
 cameraResolution_Horizontal = 96
 cameraResolution_Vertical = 96
@@ -98,6 +104,8 @@ while True:
         org = (10, 85)
         cv2.putText(frame, 'Type [P] to change the color palette.', org, font, fontScale, color, thickness, cv2.LINE_AA)
         org = (10, 100)
+        cv2.putText(frame, 'Type [S] to save the screenshot as a PNG file', org, font, fontScale, color, thickness, cv2.LINE_AA)
+        org = (10, 115)
         cv2.putText(frame, 'Type [Q] to close application', org, font, fontScale, color, thickness, cv2.LINE_AA)
         pass
     
@@ -116,6 +124,12 @@ while True:
         rotation_index = (rotation_index + 1) % 4  # rotate 90° right
     elif key == ord('p') or key == ord('P'):
         map_index = (map_index + 1) % len(color_maps) # switch heat colour maps
+    elif key == ord('s') or key == ord('S'):
+        # Current date and time
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        filename = os.path.join(SAVE_DIR, f"snapshot_{timestamp}.png")
+        # Capturing a frame and saving it to a file
+        cv2.imwrite(filename, frame)
 
 stream.release()
 cv2.destroyAllWindows() #!
