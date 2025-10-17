@@ -1,4 +1,12 @@
 {
+    "_comment_1": "------------ GOYOJO GW192A CAMERA INDEX ---------------------",
+    "_comment_2": "",
+    "_comment_WINDOWS_SYSTEM": "For Windows use numeric index (e.g., 0, 1, 2). Example: 'gw192a_camera_index': 1 will open the second camera detected by the system.",
+    "_comment_3": "",
+    "_comment_LINUX_SYSTEM": "For Linux/Raspberry Pi use device path instead (e.g., '/dev/video0', '/dev/video1', '/dev/v4l/by-id/usb-GW192A_Thermal_Camera-video-index0').",
+    "_comment_4": "",
+    "_comment_5": "-------------------------------------------------------------",
+    "gw192a_camera_index": 1,
     "rotation_index": 1,
     "map_index": 0,
     "interpolation_index": 0,
