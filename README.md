@@ -1,5 +1,7 @@
 # GOYOJO-GW192A-Thermal-Camera
-<br>
+
+![alt text](https://raw.githubusercontent.com/kuczy/GOYOJO-GW192A-Thermal-Camera/refs/heads/main/images/new_features.JPG "new_features.JPG")
+
 <p>The script allows you to launch a live image preview from the GOYOJO GW192A camera.
 I used Python.
 <br>For the script to work properly, you need to install openCV and numpy.
@@ -29,10 +31,7 @@ Configuration:
 <br>Type [I] to change the interpolation type
 <br>Type [S] to save the screenshot as a PNG file
 <br>Type [V] to capture video as MP4 file
-<br>Type [Q] to close application
-
-![alt text](https://raw.githubusercontent.com/kuczy/GOYOJO-GW192A-Thermal-Camera/refs/heads/main/images/new_features.JPG "new_features.JPG")
-  
+<br>Type [Q] to close application  
 </p>
 <hr>
 <p>
