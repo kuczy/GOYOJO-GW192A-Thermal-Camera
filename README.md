@@ -10,7 +10,8 @@ I used Python.
 <p>
 Configuration:
 <br>
-<br><b>NOTE! - So far, I haven't been able to connect to the camera under Linux/Raspbian :( I'll keep working on it to make it work!
+<br><b>NOTE! - So far, I haven't been able to connect to the camera under Linux/Raspbian :(
+<br>I'll keep working on it to make it work!
 <br>The script currently only works correctly on the Windows operating system.</b>
 <!--
 <br>To configure the camera under Windows/Linux, open the file: settings
