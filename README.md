@@ -1,7 +1,5 @@
 # GOYOJO-GW192A-Thermal-Camera
-
-![alt text](https://raw.githubusercontent.com/kuczy/GOYOJO-GW192A-Thermal-Camera/refs/heads/main/images/script.jpg "Script")
-
+<br>
 <p>The script allows you to launch a live image preview from the GOYOJO GW192A camera.
 I used Python.
 <br>For the script to work properly, you need to install openCV and numpy.
