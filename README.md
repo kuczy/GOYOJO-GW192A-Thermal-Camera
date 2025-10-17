@@ -27,6 +27,7 @@ Configuration:
 <br>Type [+]/[-] to resize window
 <br>Type [R] to rotate window
 <br>Type [P] to change the color palette
+<br>Type [G] to to turn the color gradient bar on/off
 <br>Type [I] to change the interpolation type
 <br>Type [S] to save the screenshot as a PNG file
 <br>Type [V] to capture video as MP4 file

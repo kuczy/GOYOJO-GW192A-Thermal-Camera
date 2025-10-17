@@ -147,6 +147,11 @@ show_text = False
 cameraResolution_Horizontal = 96
 cameraResolution_Vertical = 96
 
+# --- Gradient overlay settings ---
+show_gradient = True  # Flag to toggle vertical gradient display
+gradient_width = 20    # Width of the gradient bar in pixels
+gradient_margin = 10   # Margin from the window edges in pixels
+
 # --- Rotation modes ---
 rotation_modes = [
     None,
@@ -210,6 +215,14 @@ if not stream:
     log_error("Camera could not be opened. Exiting.")
     sys.exit(1)
 
+# --- Gradient generation function ---
+def create_vertical_gradient(height):
+    """Create a vertical grayscale gradient from 0 (black, bottom) to 255 (white, top)."""
+    gradient = np.linspace(0, 255, height, dtype=np.uint8)
+    gradient = np.flipud(gradient)  # Flip so bottom is black
+    gradient = np.tile(gradient[:, np.newaxis], (1, gradient_width))  # Extend to desired width
+    return gradient  # return as grayscale, coloring will be applied in main loop
+
 # --- Main loop ---
 try:
     while True:
@@ -251,6 +264,19 @@ try:
             display_frame = clean_frame.copy()
             h, w = display_frame.shape[:2]
 
+            # --- Overlay gradient if enabled ---
+            if show_gradient:
+                grad_h = h - 2 * gradient_margin
+                grad_gray = create_vertical_gradient(grad_h)
+                # Apply current colormap
+                try:
+                    grad_colored = cv2.applyColorMap(grad_gray, color_maps[map_index])
+                except Exception as e:
+                    log_exception(e, "applyColorMap to gradient")
+                    grad_colored = cv2.applyColorMap(grad_gray, color_maps[0])
+                grad_resized = cv2.resize(grad_colored, (gradient_width, grad_h), interpolation=cv2.INTER_NEAREST)
+                display_frame[gradient_margin:h-gradient_margin, w-gradient_width-gradient_margin:w-gradient_margin] = grad_resized
+
             cv2.putText(display_frame, 'GOYOJO GW192A Thermal Camera. Type [H] for help.',
                         (10, h - 10), FONT, FONT_SCALE, TEXT_COLOR, THICKNESS, cv2.LINE_AA)
 
@@ -262,6 +288,7 @@ try:
                     'Type [+]/[-] to resize window',
                     'Type [R] to rotate window',
                     'Type [P] to change the color palette',
+                    'Type [G] to to turn the color gradient bar on/off',
                     'Type [I] to change the interpolation type',
                     'Type [S] to save the screenshot as a PNG file',
                     'Type [V] to capture video as MP4 file',
@@ -357,6 +384,8 @@ try:
                             show_message("Failed to stop recording.")
                         finally:
                             video_writer = None
+            elif key in (ord('g'), ord('G')):
+                show_gradient = not show_gradient
 
         except Exception as e:
             log_exception(e, "main loop iteration")
