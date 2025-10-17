@@ -10,14 +10,12 @@ I used Python.
 <p>
 Configuration:
 <br>
-<br><p>NOTE! - So far, I haven't been able to connect to the camera under Linux/Raspbian :( I'll keep working on it to make it work!</p>
-<br>
+<br><b>NOTE! - So far, I haven't been able to connect to the camera under Linux/Raspbian :( I'll keep working on it to make it work!
+<br>The script currently only works correctly on the Windows operating system.</b>
+<!--
 <br>To configure the camera under Windows/Linux, open the file: settings
 /config.json, and provide it with the correct path to the device.
-<br>NOTE: Depending on the system, a different form is required - as specified in the comments in the file:
-
-![alt text](https://raw.githubusercontent.com/kuczy/GOYOJO-GW192A-Thermal-Camera/refs/heads/main/images/config.jpg "config.jpg")
-
+<br>NOTE: Depending on the system, a different form is required - as specified in the comments in the file: -->
 <br>
 <br>Error logging:
 <br>if the script encounters an error, it will be recorded in the file: debug
