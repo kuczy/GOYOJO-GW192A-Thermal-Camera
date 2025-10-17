@@ -9,6 +9,9 @@ I used Python.
 </p>
 <p>
 Configuration:
+<br>
+<br><p>NOTE! - So far, I haven't been able to connect to the camera under Linux/Raspbian :( I'll keep working on it to make it work!</p>
+<br>
 <br>To configure the camera under Windows/Linux, open the file: settings
 /config.json, and provide it with the correct path to the device.
 <br>NOTE: Depending on the system, a different form is required - as specified in the comments in the file:
