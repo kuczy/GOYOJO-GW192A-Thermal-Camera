@@ -342,10 +342,6 @@ try:
 
             # Draw main green text
             cv2.putText(display_frame, text, (x, y),
-                        FONT, FONT_SCALE, (0, 255, 0), THICKNESS, cv2.LINE_AA)
-
-            # Draw main green text
-            cv2.putText(display_frame, text, (x, y),
                         FONT, FONT_SCALE, (0, 255, 255), THICKNESS, cv2.LINE_AA)
 
             # --- Recording ---

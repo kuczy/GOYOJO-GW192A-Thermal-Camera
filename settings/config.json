@@ -9,6 +9,6 @@
     "gw192a_camera_index": 1,
     "rotation_index": 3,
     "map_index": 0,
-    "interpolation_index": 0,
+    "interpolation_index": 3,
     "scale_percent": 600
 }

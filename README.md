@@ -5,7 +5,7 @@
 <p>The script allows you to launch a live image preview from the GOYOJO GW192A camera.
 I used Python.
 <br>For the script to work properly, you need to install openCV and numpy.
-<br>The script should work on both Windows (default) and Linux—read the configuration information below:
+<br>The script should work on Windows
 </p>
 <p>
 Configuration:
@@ -13,14 +13,13 @@ Configuration:
 <br><b>NOTE! - So far, I haven't been able to connect to the camera under Linux/Raspbian :(
 <br>I'll keep working on it to make it work!
 <br>The script currently only works correctly on the Windows operating system.</b>
-<!--
-<br>To configure the camera under Windows/Linux, open the file: settings
-/config.json, and provide it with the correct path to the device.
-<br>NOTE: Depending on the system, a different form is required - as specified in the comments in the file: -->
 <br>
-<br>Error logging:
-<br>if the script encounters an error, it will be recorded in the file: debug
-/error.log, together with a timestamp and a description of the error.
+<br>To configure the camera under Windows, open the file: settings
+/config.json, and provide it with the correct path to the device:
+<br>For Windows use numeric index (e.g., 0, 1, 2).
+<br>Example: 'gw192a_camera_index': 1 will open the second camera detected by the system.
+<!-- <br>NOTE: Depending on the system, a different form is required - as specified in the comments in the file: -->
+<br>
 </p>
 <p>
 <br>Application features:
@@ -34,6 +33,13 @@ Configuration:
 <br>Type [S] to save the screenshot as a PNG file
 <br>Type [V] to capture video as MP4 file
 <br>Type [Q] to close application  
+<br>
+<br>Error logging:
+<br>if the script encounters an error, it will be recorded in the file: debug
+/error.log, together with a timestamp and a description of the error.
+<br>
+<br>Values indicated under the cursor:
+<br>There is no direct temperature reading yet, but you can check the relative heat intensity value on a scale of 0..100%.
 </p>
 <hr>
 <p>
