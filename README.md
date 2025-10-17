@@ -5,6 +5,20 @@
 <p>The script allows you to launch a live image preview from the GOYOJO GW192A camera.
 I used Python.
 <br>For the script to work properly, you need to install openCV and numpy.
+<br>The script should work on both Windows (default) and Linux—read the configuration information below:
+</p>
+<p>
+Configuration:
+<br>To configure the camera under Windows/Linux, open the file: settings
+/config.json, and provide it with the correct path to the device.
+<br>NOTE: Depending on the system, a different form is required - as specified in the comments in the file:
+
+![alt text](https://raw.githubusercontent.com/kuczy/GOYOJO-GW192A-Thermal-Camera/refs/heads/main/images/config.jpg "config.jpg")
+
+<br>
+<br>Error logging:
+<br>if the script encounters an error, it will be recorded in the file: debug
+/error.log, together with a timestamp and a description of the error.
 </p>
 <p>
 <br>Application features:
