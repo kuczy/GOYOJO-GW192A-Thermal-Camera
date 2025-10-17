@@ -327,9 +327,26 @@ try:
             # Calculate grayscale value 0-100%
             mouse_value = int(gray_uint8[orig_y, orig_x] / 255 * 100)
 
-            # --- Draw mouse value ---
-            cv2.putText(display_frame, f"{mouse_value}%", (mouse_x + 5, mouse_y - 5),
-                        FONT, 0.4, (0, 255, 0), 1, cv2.LINE_AA)
+           # --- Draw mouse value with full black outline (8-neighbor) ---
+            text = f"{mouse_value}%"
+            x = mouse_x + 5
+            y = mouse_y - 5
+
+            # Draw black outline around text (all 8 neighbours)
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    if dx == 0 and dy == 0:
+                        continue
+                    cv2.putText(display_frame, text, (x + dx, y + dy),
+                                FONT, FONT_SCALE, (64, 64, 64), THICKNESS + 1, cv2.LINE_AA)
+
+            # Draw main green text
+            cv2.putText(display_frame, text, (x, y),
+                        FONT, FONT_SCALE, (0, 255, 0), THICKNESS, cv2.LINE_AA)
+
+            # Draw main green text
+            cv2.putText(display_frame, text, (x, y),
+                        FONT, FONT_SCALE, (0, 255, 255), THICKNESS, cv2.LINE_AA)
 
             # --- Recording ---
             if is_recording:
