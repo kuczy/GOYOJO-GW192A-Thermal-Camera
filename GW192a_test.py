@@ -27,7 +27,7 @@ def log_error(msg):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     with open(DEBUG_FILE, "a", encoding="utf-8") as f:
         f.write(f"[{timestamp}] {msg}\n")
-    print(msg)  # print to console as well
+    print(msg)
 
 def log_exception(e, context=""):
     tb = traceback.format_exc()
@@ -148,9 +148,9 @@ cameraResolution_Horizontal = 96
 cameraResolution_Vertical = 96
 
 # --- Gradient overlay settings ---
-show_gradient = True  # Flag to toggle vertical gradient display
-gradient_width = 20    # Width of the gradient bar in pixels
-gradient_margin = 10   # Margin from the window edges in pixels
+show_gradient = True
+gradient_width = 20
+gradient_margin = 10
 
 # --- Rotation modes ---
 rotation_modes = [
@@ -219,9 +219,21 @@ if not stream:
 def create_vertical_gradient(height):
     """Create a vertical grayscale gradient from 0 (black, bottom) to 255 (white, top)."""
     gradient = np.linspace(0, 255, height, dtype=np.uint8)
-    gradient = np.flipud(gradient)  # Flip so bottom is black
-    gradient = np.tile(gradient[:, np.newaxis], (1, gradient_width))  # Extend to desired width
-    return gradient  # return as grayscale, coloring will be applied in main loop
+    gradient = np.flipud(gradient)
+    gradient = np.tile(gradient[:, np.newaxis], (1, gradient_width))
+    return gradient
+
+# --- Mouse tracking variables ---
+mouse_x, mouse_y = 0, 0
+mouse_value = 0
+
+def mouse_callback(event, x, y, flags, param):
+    global mouse_x, mouse_y
+    if event == cv2.EVENT_MOUSEMOVE:
+        mouse_x, mouse_y = x, y
+
+cv2.namedWindow("GW192A thermal Camera Live View")
+cv2.setMouseCallback("GW192A thermal Camera Live View", mouse_callback)
 
 # --- Main loop ---
 try:
@@ -268,7 +280,6 @@ try:
             if show_gradient:
                 grad_h = h - 2 * gradient_margin
                 grad_gray = create_vertical_gradient(grad_h)
-                # Apply current colormap
                 try:
                     grad_colored = cv2.applyColorMap(grad_gray, color_maps[map_index])
                 except Exception as e:
@@ -277,9 +288,11 @@ try:
                 grad_resized = cv2.resize(grad_colored, (gradient_width, grad_h), interpolation=cv2.INTER_NEAREST)
                 display_frame[gradient_margin:h-gradient_margin, w-gradient_width-gradient_margin:w-gradient_margin] = grad_resized
 
+            # --- Draw static text ---
             cv2.putText(display_frame, 'GOYOJO GW192A Thermal Camera. Type [H] for help.',
                         (10, h - 10), FONT, FONT_SCALE, TEXT_COLOR, THICKNESS, cv2.LINE_AA)
 
+            # --- Draw help text ---
             if show_text:
                 lines = [
                     'Application features:',
@@ -288,20 +301,37 @@ try:
                     'Type [+]/[-] to resize window',
                     'Type [R] to rotate window',
                     'Type [P] to change the color palette',
-                    'Type [G] to to turn the color gradient bar on/off',
+                    'Type [G] to turn the color gradient bar on/off',
                     'Type [I] to change the interpolation type',
                     'Type [S] to save the screenshot as a PNG file',
                     'Type [V] to capture video as MP4 file',
                     'Type [Q] to close application'
                 ]
-                y = 20
+                y_line = 20
                 for line in lines:
-                    cv2.putText(display_frame, line, (10, y), FONT, FONT_SCALE, TEXT_COLOR, THICKNESS, cv2.LINE_AA)
-                    y += 15
+                    cv2.putText(display_frame, line, (10, y_line), FONT, FONT_SCALE, TEXT_COLOR, THICKNESS, cv2.LINE_AA)
+                    y_line += 15
 
+            # --- Draw last message ---
             if last_message and (time.time() - last_message_time < MESSAGE_DURATION):
                 cv2.putText(display_frame, last_message, (10, h - 25), FONT, FONT_SCALE, TEXT_COLOR, THICKNESS, cv2.LINE_AA)
 
+            # --- Update mouse value scaled to original frame ---
+            orig_x = int(mouse_x / scale_percent * 100)
+            orig_y = int(mouse_y / scale_percent * 100)
+
+            # Defensive bounds
+            orig_x = min(max(orig_x, 0), gray_uint8.shape[1]-1)
+            orig_y = min(max(orig_y, 0), gray_uint8.shape[0]-1)
+
+            # Calculate grayscale value 0-100%
+            mouse_value = int(gray_uint8[orig_y, orig_x] / 255 * 100)
+
+            # --- Draw mouse value ---
+            cv2.putText(display_frame, f"{mouse_value}%", (mouse_x + 5, mouse_y - 5),
+                        FONT, 0.4, (0, 255, 0), 1, cv2.LINE_AA)
+
+            # --- Recording ---
             if is_recording:
                 current_time = time.time()
                 if current_time - last_blink_time >= BLINK_INTERVAL:
@@ -316,6 +346,7 @@ try:
                     except Exception as e:
                         log_exception(e, "video_writer.write")
 
+            # --- Show window ---
             cv2.imshow("GW192A thermal Camera Live View", display_frame)
 
             # --- Keyboard controls ---
